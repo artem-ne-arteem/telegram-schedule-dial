@@ -1,0 +1,23 @@
+diff --git a/submodules/TelegramUI/Sources/Chat/ChatMessageDisplaySendMessageOptions.swift b/submodules/TelegramUI/Sources/Chat/ChatMessageDisplaySendMessageOptions.swift
+index a1a8f61..1047c22 100644
+--- a/submodules/TelegramUI/Sources/Chat/ChatMessageDisplaySendMessageOptions.swift
++++ b/submodules/TelegramUI/Sources/Chat/ChatMessageDisplaySendMessageOptions.swift
+@@ -33,6 +33,18 @@ private func makeRichTextSendPreview(context: AccountContext, content: ChatInput
+ }
+ 
+ func chatMessageDisplaySendMessageOptions(selfController: ChatControllerImpl, node: ASDisplayNode, gesture: ContextGesture) {
++    // Schedule Dial: a new message is scheduled from a dial instead of the options menu.
++    if selfController.presentationInterfaceState.interfaceState.editMessage == nil, selfController.presentationInterfaceState.subject != .scheduledMessages, selfController.chatLocation.peerId != nil {
++        // The long-press gesture lives on the send button itself.
++        let sendControl = gesture.view?.asyncdisplaykit_node as? ASControlNode
++        gesture.cancel()
++        presentChatScheduleDial(selfController: selfController, sendButton: node, sendControl: sendControl)
++        return
++    }
++    chatMessageDisplayDefaultSendMessageOptions(selfController: selfController, node: node, gesture: gesture)
++}
++
++private func chatMessageDisplayDefaultSendMessageOptions(selfController: ChatControllerImpl, node: ASDisplayNode, gesture: ContextGesture) {
+     guard let peerId = selfController.chatLocation.peerId, let textInputView = selfController.chatDisplayNode.textInputView(), let layout = selfController.validLayout else {
+         return
+     }
